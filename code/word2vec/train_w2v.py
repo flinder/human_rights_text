@@ -1,41 +1,78 @@
 from pymongo import MongoClient
 from gensim.models import Word2Vec
-from gensim.models import Doc2Vec
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+import os
+from nltk.stem import PorterStemmer
+import re
+import sys
 
 #connection = pm.Connection("52.26.27.169", 8892)
 # In order to connect to the DB on the server a ssh tunnel has to be set up
 # run on your local machine:
 #  ssh -N -f -L localhost:[port to tunnel to (here 7002)]:localhost:27017 ec2
 
-client = MongoClient('mongodb://localhost:7002/')
+client = MongoClient('mongodb://localhost:7003/')
 
 db = client['human_rights_text']
 reports = db['reports']
 
-point = reports.find({'year.0': {'$gt': 1979, '$lt': 1990},
-                      'organization': 'State Department'})
+point = reports.find({'year.0': {'$gt': 1999},
+                      'organization': 'Amnesty International'})
 
-print '%d documents found in database' %point.count()
+n_reports = point.count()
+
+print '%d documents found in database' %n_reports
+
 # Make a class with an iterator so the model can be trained sequentially and
 # not all data has to be loaded to memory
-
 class Sentences(object):
 
     def __init__(self, pointer):
         self.pointer = pointer
+        self.n_doc = pointer.count()
 
     def __iter__(self):
         """
         Iterates over sentences in documents
         """
+        i = 0
         for document in self.pointer:
-            print 'Processed %s' %document['file_name']
             sentences = document['preprocessed_text']
             for sentence in sentences:
                 yield sentence
+            i += 1
+            print 'Processed %d of %d documents' %(i, self.n_doc)
 
 
-sentences = Sentences(point)
+class Sentences_raw(object):
+    
+    def __init__(self, pointer):
+        self.pointer = pointer
+        self.n_doc = pointer.count()
+
+    def __iter__(self):
+        """
+        Iterates over sentences in documents
+        """
+        
+        exclude = re.compile('[^a-zA-Z0-9 ]')
+        linebreaks = re.compile('\s')
+
+        i = 0
+        for document in self.pointer:
+            text = document['raw_text'].lower()
+            sentences_1 = sent_tokenize(text)
+            for sentence in sentences_1:
+                sentence = linebreaks.sub(' ', sentence)
+                sentence = exclude.sub('', sentence)
+                tokens = word_tokenize(sentence)
+                yield tokens
+
+            i += 1
+            print 'Processed %d of %d documents' %(i, self.n_doc)
+                        
+sentences = Sentences_raw(point)
 model = Word2Vec(sentences)
-model.save('models/w2v_test')
-print model.most_similar(positive = ['tortur'])
+model.save('models/ai_raw_00s')
+
