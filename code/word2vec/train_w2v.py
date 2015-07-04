@@ -37,5 +37,5 @@ class Sentences(object):
 
 sentences = Sentences(point)
 model = Word2Vec(sentences)
-model.save('w2v_test')
+model.save('models/w2v_test')
 print model.most_similar(positive = ['tortur'])
