@@ -21,7 +21,7 @@ class Document(object):
         if re.search('AI_', self.fname):
             return 'Amnesty International'
         elif re.search('Critique_', self.fname):
-            return 'Critique'
+            return 'Lawyers Committee'
         elif re.search('hwr[0-9]{4}', self.fname):
             return 'Human Rights Watch'
         elif re.search('State_', self.fname):
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         if re.search('AI_', fname):
             return 'Amnesty International'
         elif re.search('Critique_', fname):
-            return 'Critique'
+            return 'Lawyers Committee'
         elif re.search('hwr[0-9]{4}', fname):
             return 'Human Rights Watch'
         elif re.search('State_', fname):
@@ -180,7 +180,7 @@ if __name__ == "__main__":
                 organization = get_doctype(path)
                 if organization == 'Amnesty International':
                     doc = AI_doc(path)
-                elif organization == 'Critique':
+                elif organization == 'Lawyers Committee':
                     doc = CR_doc(path)
                 elif organization == 'Human Rights Watch':
                     doc = HRW_doc(path)
