@@ -7,6 +7,8 @@ from nltk.stem import PorterStemmer
 import sys
 import os
 import json
+from datetime import datetime
+from countrycode import countrycode
 
 class Document(object):
 
@@ -51,8 +53,16 @@ class Document(object):
         fname_wo_extension = self.fname[:-4]
         country = re.sub(regex, '', fname_wo_extension)
         country = re.sub('( |-)', '_', country)
-        print country.lower()
-        return country.lower()
+
+        # Resolce country name
+        out = {}
+        out['country_name'] = countrycode(codes = country, origin='country_name',
+                                          target='country_name')
+        out['country_code'] = countrycode(codes = country, origin='country_name',
+                                          target='iso3c')
+        if out['country_code'] is None:
+            print "Could not resolve coutnry name for %s" %country
+        return out
 
     def extract_clean_sentences(self):
         """
@@ -89,10 +99,12 @@ class Document(object):
         doc = {}
         doc['file_name'] = self.fname
         doc['organization'] = self.organization
-        doc['country'] = self.country
+        doc['country_name'] = self.country_name
+        doc['country_iso3c'] = self.country_iso3c
         doc['year'] = self.year
         doc['preprocessed_text'] = self.sentences
         doc['raw_text'] = self.raw_text
+        doc['length'] = len(self.raw_text)
         return doc
 
 
@@ -101,7 +113,9 @@ class AI_doc(Document):
     def __init__(self, path):
         Document.__init__(self, path)
         self.year = self.get_year()
-        self.country = self.get_country('AI_Report_[0-9]{4}((-|_)[0-9]{2})?_')
+        cntry = self.get_country('AI_Report_[0-9]{4}((-|_)[0-9]{2})?_')
+        self.country_name = cntry['country_name']
+        self.country_iso3c = cntry['country_code']
         self.sentences = self.extract_clean_sentences()
 
     def get_year(self):
@@ -126,7 +140,9 @@ class SD_doc(Document):
     def __init__(self, path):
         Document.__init__(self, path)
         self.year = self.get_year()
-        self.country = self.get_country('State_Report_[0-9]{4}_')
+        cntry = self.get_country('State_Report_[0-9]{4}_')
+        self.country_name = cntry['country_name']
+        self.country_iso3c = cntry['country_code']
         self.sentences = self.extract_clean_sentences()
 
 
@@ -135,16 +151,19 @@ class CR_doc(Document):
     def __init__(self, path):
         Document.__init__(self, path)
         self.year = self.get_year()
-        self.country = self.get_country('Critique_Review_[0-9]{4}_')
+        cntry = self.get_country('Critique_Review_[0-9]{4}_')
+        self.country_name = cntry['country_name']
+        self.country_iso3c = cntry['country_code']
         self.sentences = self.extract_clean_sentences()
 
-        
 class HRW_doc(Document):
 
     def __init__(self, path):
         Document.__init__(self, path)
         self.year = self.get_year()
-        self.country = self.get_country('hwr[0-9]{4}_')
+        cntry = self.get_country('hwr[0-9]{4}_')
+        self.country_name = cntry['country_name']
+        self.country_iso3c = cntry['country_code']
         self.sentences = self.extract_clean_sentences()
 
 
@@ -169,9 +188,12 @@ if __name__ == "__main__":
     
     file_dir = sys.argv[1]
     out_fname = sys.argv[2]
+    out_path = os.path.dirname(out_fname)
+    log_fname = os.path.join(out_path, 'log.txt')
 
+    
     i = 0
-    with open(out_fname, 'w') as outfile:
+    with open(out_fname, 'w') as outfile, open(log_fname, 'a') as logfile:
         
         for root, dirs, files in os.walk(file_dir):
             
@@ -190,8 +212,16 @@ if __name__ == "__main__":
                     doc = SD_doc(path)
                 else:
                     raise ValueError('No organization')
+
                 
-                outfile.write(json.dumps(doc.export_dict()))
+                out = doc.export_dict()
+                try:
+                    out['country_iso3c']
+                except KeyError:
+                    message = "[%s] Could not resolve country name for: %s \n" %(str(datetime.now()), out['file_name'])
+                    logfile.write(message)
+                                                                            
+                outfile.write(json.dumps(out))
                 outfile.write('\n')
 
                 i += 1

@@ -6,12 +6,13 @@ import pandas as pd
 import sys
 import re
 from datetime import datetime
+from countrycode import countrycode
 
 # ssh -N -f -L localhost:7003:localhost:27017 ec2
 
 # Establish database connection
-client = MongoClient('mongodb://localhost:7003/')
-db = client['human_rights_text']
+client = MongoClient('52.26.27.169', 27017)
+db = client['hr_text']
 reports = db['reports']
 
 # Read metadata file
@@ -22,14 +23,17 @@ for idx, row in df.iterrows():
     organization = row['Organization']
     year = row['Year']
 
-    try:
-        country = row['Country'].lower()
-        country = re.sub(' ', '_', country)
-    except Exception as e:
+    # Resolve the country name in the info df
+    country = countrycode(codes = row['Country'], origin='country_name',
+                          target='country_name')
+    code = countrycode(codes = row['Country'], origin='country_name',
+                       target='iso3c')
+        
+    if code is None:
         with open('log.txt', 'a') as logfile:
-            message = 'Error in to lower for %s' %row['filename']
+            message = '[%s]: Could not resolve country: %s' %(str(datetime.now()), row['filename'])
             logfile.write(message)
-
+            
     # Find matching document in databasen
     point = reports.find({'organization': organization,
                           'year': year,
