@@ -50,7 +50,8 @@ class Document(object):
         
         fname_wo_extension = self.fname[:-4]
         country = re.sub(regex, '', fname_wo_extension)
-        country = re.sub(' ', '_', country)
+        country = re.sub('( |-)', '_', country)
+        print country.lower()
         return country.lower()
 
     def extract_clean_sentences(self):

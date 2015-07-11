@@ -10,7 +10,7 @@ import sys
 #connection = pm.Connection("52.26.27.169", 8892)
 # In order to connect to the DB on the server a ssh tunnel has to be set up
 # run on your local machine:
-#  ssh -N -f -L localhost:[port to tunnel to (here 7002)]:localhost:27017 ec2
+#  ssh -N -f -L localhost:7003:localhost:27017 ec2
 
 client = MongoClient('mongodb://localhost:7003/')
 
