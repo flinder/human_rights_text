@@ -8,16 +8,19 @@ from stanford_corenlp_pywrapper import CoreNLP
 
 # Named entity recognition on human rights reports
 
-proc = CoreNLP("ner", corenlp_jars = ["/home/flinder/corenlp/stanford-corenlp-full-2015-04-20/*"])
+proc = CoreNLP("ner", corenlp_jars = ["/home/ubuntu/corenlp/stanford-corenlp-full-2015-04-20/*"])
+# proc = CoreNLP("ner", corenlp_jars = ["/home/flinder/corenlp/stanford-corenlp-full-2015-04-20/*"])
 
-# Connect to database
-client = MongoClient('52.25.102.188', 27017)
+## Connect to database
+
+# When not working from the server:
+#client = MongoClient('52.25.102.188', 27017)
+
+client = MongoClient()
 db = client['hr_text']
 reports = db['reports']
 
-
 cursor = reports.find({'raw_text': {'$exists': True}, 'year.0': 1979}).limit(10)
-
 
 for document in cursor:
 
