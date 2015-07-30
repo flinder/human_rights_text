@@ -1,0 +1,7 @@
+file_name
+organization
+year
+country_name
+country_iso3c
+wordcount
+ner_count
