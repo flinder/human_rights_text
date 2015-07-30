@@ -25,10 +25,15 @@ def track_process(idx, stepsize, tasksize, timing = True):
 
 # Named entity recognition on human rights reports
 
+
 proc = CoreNLP("nerparse", corenlp_jars = ["/home/flinder/corenlp/stanford-corenlp-full-2015-04-20/*"])
 
-# Connect to database
-client = MongoClient('52.25.102.188', 27017)
+## Connect to database
+
+# When not working from the server:
+#client = MongoClient('52.25.102.188', 27017)
+
+client = MongoClient()
 db = client['hr_text']
 reports = db['reports']
 
@@ -41,6 +46,7 @@ last_call = time.time()
 times = []
 
 i = 0
+
 for document in cursor:
 
     i += 1
@@ -53,6 +59,7 @@ for document in cursor:
     parsed_text = proc.parse_doc(text)
 
     # Count named entity types
+
     # ner_count = {}
     # for sentence in parsed_text['sentences']:
     #     ner = sentence['ner']
