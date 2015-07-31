@@ -8,16 +8,38 @@ import re
 from datetime import datetime
 from countrycode import countrycode
 from pprint import pprint
+import time
+import numpy as np
 
 # Establish database connection
-client = MongoClient('52.25.102.188', 27017)
+#client = MongoClient('52.25.102.188', 27017)
+client = MongoClient()
 db = client['hr_text']
 reports = db['reports']
+
+# Function to monitor loop progress
+def track_process(idx, stepsize, tasksize, timing = True):
+    global last_call
+    global times
+
+    iter_time = time.time() - last_call
+    last_call = time.time()
+    times.append(iter_time)
+    
+    if idx % stepsize == 0 and iter_time is not None:
+        print "Finished %d of %d items. Average time per item: %fs" %(idx, tasksize, np.mean(times))
+        times = []
+
 
 # Read metadata file
 df = pd.read_csv('../../data/report_info.csv')
 
+last_call = time.time()
+times = []
+n_iter = df.shape[0]
+
 for idx, row in df.iterrows():
+
 
     organization = row['Organization']
     year = row['Year']
@@ -83,9 +105,13 @@ for idx, row in df.iterrows():
                            }
     doc['political_terror_scale'] = None
     doc['hathaway'] = row['hathaway']
+    doc['state'] = row['State']
+    doc['genocide'] = row['genocide']
+    doc['rummel'] = row['rummel']
+    doc['massive_repression'] = row['massive_repression']
+    doc['amnesty'] = row['Amnesty']
     doc['fariss'] = {'mean': row['latentmean'],
                      'std_deviation': row['latentsd']
                      }
     reports.update({'_id': doc['_id']}, doc)
-
-    print idx
+    track_process(idx, 100, n_iter, timing = True)
