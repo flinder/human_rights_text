@@ -24,7 +24,7 @@ class Document(object):
         self.organization = self.get_organization()
         with open(path) as infile:
             self.raw_text = unicode(infile.read(), encoding = 'utf-8', errors = 'ignore')
-        self.typos = typos
+       self.typos = typos
         
     def get_organization(self):
         if re.search('AI_', self.fname):
@@ -66,37 +66,36 @@ class Document(object):
         out = {}
 
 
+        try:
+            raw_name = countrycode(codes = country, origin='country_name',
+                                   target='country_name')
+            code = countrycode(codes = country, origin='country_name',
+                               target='iso3c')
 
-        raw_name = countrycode(codes = country, origin='country_name',
-                               target='country_name')
-        code = countrycode(codes = country, origin='country_name',
-                           target='iso3c')
-        
-        # If no name match look in the typo file
-        if code == raw_name:
-            print "Try to find match in typo file for '%s'" %country
-            try:
-                raw_name = countrycode(codes = [self.typos[country]],
-                                       origin='country_name',
-                                       target='country_name')
-                code = countrycode(codes = [self.typos[country]],
-                                   origin= 'country_name',
-                                   target= 'iso3c')
+            # If no name match look in the typo file
+            if code == raw_name:
+                try:
+                    raw_name = countrycode(codes = [self.typos[country]],
+                                           origin='country_name',
+                                           target='country_name')
+                    code = countrycode(codes = [self.typos[country]],
+                                       origin= 'country_name',
+                                       target= 'iso3c')
+                    out['country_name'] = raw_name
+                    out['country_code'] = code
 
-                print "successful"
+                except KeyError:
+                    print "Could not resolve country name for %s" %raw_name
+                    out['country_name'] = "Not resolved"
+                    out['country_code'] = "Not resolved"
+
+            else:
                 out['country_name'] = raw_name
                 out['country_code'] = code
-                print out['country_name']
-                print out['country_code']
-
-            except KeyError:
-                print "Could not resolve coutnry name for %s" %raw_name
-                out['country_name'] = "Not resolved"
-                out['country_code'] = "Not resolved"
-
-        else:
-            out['country_name'] = raw_name
-            out['country_code'] = code
+        except UnicodeEncodeError:
+            print "Could not resolve country name for %s" %raw_name
+            out['country_name'] = "Not resolved"
+            out['country_code'] = "Not resolved"
                
         return out
 
@@ -232,7 +231,7 @@ if __name__ == "__main__":
         if idx % stepsize == 0 and iter_time is not None:
             mean = np.mean(times)
             estimated = mean * (tasksize - idx) / 3600
-            print "Finished %d of %d items. Estimated time remaining: %f (%f pi)" %(idx, tasksize, estimated, mean)
+            print "Finished %d of %d items. Estimated time remaining: %f h (%f pi)" %(idx, tasksize, estimated, mean)
             times = []
 
     file_dir = sys.argv[1]
