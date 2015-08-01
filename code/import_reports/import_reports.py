@@ -7,18 +7,25 @@ from nltk.stem import PorterStemmer
 import sys
 import os
 import json
+import pandas as pd
 from datetime import datetime
 from countrycode import countrycode
+from pymongo import MongoClient
+from nltk.metrics import *
+import codecs
+import time
+import numpy as np
 
 class Document(object):
 
-    def __init__(self, path):
+    def __init__(self, path, typos):
         self.path = path
         self.fname = ntpath.basename(path)
         self.organization = self.get_organization()
         with open(path) as infile:
             self.raw_text = unicode(infile.read(), encoding = 'utf-8', errors = 'ignore')
-
+        self.typos = typos
+        
     def get_organization(self):
         if re.search('AI_', self.fname):
             return 'Amnesty International'
@@ -53,15 +60,44 @@ class Document(object):
         fname_wo_extension = self.fname[:-4]
         country = re.sub(regex, '', fname_wo_extension)
         country = re.sub('( |-)', '_', country)
-
-        # Resolce country name
+        country = country.lower()
+        country = re.sub('_', ' ', country)
+        # Resolve country name
         out = {}
-        out['country_name'] = countrycode(codes = country, origin='country_name',
-                                          target='country_name')
-        out['country_code'] = countrycode(codes = country, origin='country_name',
-                                          target='iso3c')
-        if out['country_code'] is None:
-            print "Could not resolve coutnry name for %s" %country
+
+
+
+        raw_name = countrycode(codes = country, origin='country_name',
+                               target='country_name')
+        code = countrycode(codes = country, origin='country_name',
+                           target='iso3c')
+        
+        # If no name match look in the typo file
+        if code == raw_name:
+            print "Try to find match in typo file for '%s'" %country
+            try:
+                raw_name = countrycode(codes = [self.typos[country]],
+                                       origin='country_name',
+                                       target='country_name')
+                code = countrycode(codes = [self.typos[country]],
+                                   origin= 'country_name',
+                                   target= 'iso3c')
+
+                print "successful"
+                out['country_name'] = raw_name
+                out['country_code'] = code
+                print out['country_name']
+                print out['country_code']
+
+            except KeyError:
+                print "Could not resolve coutnry name for %s" %raw_name
+                out['country_name'] = "Not resolved"
+                out['country_code'] = "Not resolved"
+
+        else:
+            out['country_name'] = raw_name
+            out['country_code'] = code
+               
         return out
 
     def extract_clean_sentences(self):
@@ -104,14 +140,12 @@ class Document(object):
         doc['year'] = self.year
         doc['preprocessed_text'] = self.sentences
         doc['raw_text'] = self.raw_text
-        doc['length'] = len(self.raw_text)
         return doc
-
-
+    
 class AI_doc(Document):
 
-    def __init__(self, path):
-        Document.__init__(self, path)
+    def __init__(self, path, typos):
+        Document.__init__(self, path, typos)
         self.year = self.get_year()
         cntry = self.get_country('AI_Report_[0-9]{4}((-|_)[0-9]{2})?_')
         self.country_name = cntry['country_name']
@@ -137,8 +171,8 @@ class AI_doc(Document):
 
 class SD_doc(Document):
     
-    def __init__(self, path):
-        Document.__init__(self, path)
+    def __init__(self, path, typos):
+        Document.__init__(self, path, typos)
         self.year = self.get_year()
         cntry = self.get_country('State_Report_[0-9]{4}_')
         self.country_name = cntry['country_name']
@@ -148,8 +182,8 @@ class SD_doc(Document):
 
 class CR_doc(Document):
 
-    def __init__(self, path):
-        Document.__init__(self, path)
+    def __init__(self, path, typos):
+        Document.__init__(self, path, typos)
         self.year = self.get_year()
         cntry = self.get_country('Critique_Review_[0-9]{4}_')
         self.country_name = cntry['country_name']
@@ -158,8 +192,8 @@ class CR_doc(Document):
 
 class HRW_doc(Document):
 
-    def __init__(self, path):
-        Document.__init__(self, path)
+    def __init__(self, path, typos):
+        Document.__init__(self, path, typos)
         self.year = self.get_year()
         cntry = self.get_country('hwr[0-9]{4}_')
         self.country_name = cntry['country_name']
@@ -175,54 +209,75 @@ if __name__ == "__main__":
     def get_doctype(path):
         fname = ntpath.basename(path)
         if re.search('AI_', fname):
-            return 'Amnesty International'
+            return AI_doc(path, typos)
         elif re.search('Critique_', fname):
-            return 'Lawyers Committee'
+            return CR_doc(path, typos)
         elif re.search('hwr[0-9]{4}', fname):
-            return 'Human Rights Watch'
+            return HRW_doc(path, typos)
         elif re.search('State_', fname):
-            return 'State Department'
+            return SD_doc(path, typos)
         else:
             error = 'Unexpected filename: %s' %fname
             raise ValueError(error)
-    
+
+
+    def track_process(idx, stepsize, tasksize, timing = True):
+        global last_call
+        global times
+
+        iter_time = time.time() - last_call
+        last_call = time.time()
+        times.append(iter_time)
+
+        if idx % stepsize == 0 and iter_time is not None:
+            mean = np.mean(times)
+            estimated = mean * (tasksize - idx) / 3600
+            print "Finished %d of %d items. Estimated time remaining: %f (%f pi)" %(idx, tasksize, estimated, mean)
+            times = []
+
     file_dir = sys.argv[1]
-    out_fname = sys.argv[2]
-    out_path = os.path.dirname(out_fname)
-    log_fname = os.path.join(out_path, 'log.txt')
+    log_fname = sys.argv[2]
+    database = sys.argv[3]
+    collection = sys.argv[4]
+
+    # Load typo file
+    typos = {}
+    with codecs.open('../../data/coding_files/countryname_typos.csv', encoding = 'utf-8') as infile:
+        for line in infile:
+            line = re.sub("\", \"", "\"|\"", line)
+            line = re.sub("\"", "", line)
+            line = re.sub("\n", "", line)
+            line = line.lower()
+            splits = line.split("|")
+            typos[splits[0]] = splits[1]
 
     
+    # Connect to mongo db
+    connection = MongoClient()[database][collection]
+
+    print file_dir
     i = 0
-    with open(out_fname, 'w') as outfile, open(log_fname, 'a') as logfile:
-        
-        for root, dirs, files in os.walk(file_dir):
+    last_call = time.time()
+    times = []
+    for root, dirs, files in os.walk(file_dir):
+
+        for fname in files:
             
-            for fname in files:
-                
-                path = os.path.join(root, fname)
+            path = os.path.join(root, fname)
 
-                organization = get_doctype(path)
-                if organization == 'Amnesty International':
-                    doc = AI_doc(path)
-                elif organization == 'Lawyers Committee':
-                    doc = CR_doc(path)
-                elif organization == 'Human Rights Watch':
-                    doc = HRW_doc(path)
-                elif organization == 'State Department':
-                    doc = SD_doc(path)
-                else:
-                    raise ValueError('No organization')
+            doc = get_doctype(path)
 
-                
-                out = doc.export_dict()
-                try:
-                    out['country_iso3c']
-                except KeyError:
-                    message = "[%s] Could not resolve country name for: %s \n" %(str(datetime.now()), out['file_name'])
+            out = doc.export_dict()
+            try:
+                out['country_iso3c']
+            except KeyError:
+                message = "[%s] Could not resolve country name for: %s \n" %(str(datetime.now()), out['file_name'])
+                with open(log_fname, 'a') as logfile:
                     logfile.write(message)
-                                                                            
-                outfile.write(json.dumps(out))
-                outfile.write('\n')
 
-                i += 1
-                print 'Processed %d files' %i
+            connection.update({'fname': doc.fname}, out, upsert = True)
+
+            i += 1
+            track_process(i, 100, 15000, timing = True)
+    
+
