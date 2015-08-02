@@ -14,7 +14,7 @@ import numpy as np
 # Establish database connection
 #client = MongoClient('52.25.102.188', 27017)
 client = MongoClient()
-db = client['hr_text']
+db = client['hr']
 reports = db['reports']
 
 # Function to monitor loop progress
@@ -31,8 +31,23 @@ def track_process(idx, stepsize, tasksize, timing = True):
         times = []
 
 
+def recursive_na_delete(doc):
+    for key in doc.keys():
+        if isinstance(doc[key], float):
+            if np.isnan(doc[key]):
+                del doc[key]
+                
+        elif isinstance(doc[key], dict):
+            recursive_na_delete(doc[key])
+
+        else:
+            continue
+
+    return doc
+
+
 # Read metadata file
-df = pd.read_csv('../../data/report_info.csv')
+df = pd.read_csv('../../data/coding_files/hr_codings.csv')
 
 last_call = time.time()
 times = []
@@ -42,21 +57,20 @@ for idx, row in df.iterrows():
 
     year = row['Year']
     code = row['country_iso3c']
+    country = row['country_name']
     
     # Find matching document in database
     point = reports.find({'country_iso3c': code,
-                          'organization': organization,
                           'year.0': year
                           })
     if point.count() == 0:
-        error = 'No match for %s %s %s' %(organization, year, country)
+        error = 'No match for %s %s' %(year, country)
         print error
         with open('log.txt', 'a') as logfile:
             message = '[%s]: %s \n' %(str(datetime.now()), error)
             logfile.write(message)
         continue
-
-
+    
     for doc in point:
         
         doc['country_cow_code'] = row['country_cow']
@@ -84,6 +98,9 @@ for idx, row in df.iterrows():
         doc['fariss'] = {'mean': row['latentmean'],
                          'std_deviation': row['latentsd']
                          }
+
+
+        doc = recursive_na_delete(doc)
 
         # Insert word count
         count = 0

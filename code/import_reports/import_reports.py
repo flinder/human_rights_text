@@ -24,7 +24,7 @@ class Document(object):
         self.organization = self.get_organization()
         with open(path) as infile:
             self.raw_text = unicode(infile.read(), encoding = 'utf-8', errors = 'ignore')
-       self.typos = typos
+        self.typos = typos
         
     def get_organization(self):
         if re.search('AI_', self.fname):
