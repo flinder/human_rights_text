@@ -17,8 +17,7 @@ client = MongoClient('mongodb://localhost:7003/')
 db = client['human_rights_text']
 reports = db['reports']
 
-point = reports.find({'year.0': {'$gt': 1999},
-                      'organization': 'Amnesty International'})
+point = reports.find()
 
 n_reports = point.count()
 
@@ -74,5 +73,5 @@ class Sentences_raw(object):
                         
 sentences = Sentences_raw(point)
 model = Word2Vec(sentences)
-model.save('models/ai_raw_00s')
+model.save('models/all_reports')
 
