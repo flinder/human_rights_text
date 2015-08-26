@@ -70,3 +70,4 @@ sentences = Sentences_raw(point)
 model = Word2Vec(sentences)
 model.save('models/all_reports')
 
+
