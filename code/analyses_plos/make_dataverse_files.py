@@ -5,7 +5,7 @@ import codecs
 
 DB = "hr"
 COLL = "reports"
-OUTPATH = "../../data/dataverse/"
+OUTPATH = "../../data/analyses_plos/dataverse/"
 
 connection = MongoClient()[DB][COLL]
 
@@ -18,5 +18,5 @@ for doc in cursor:
     outfile_name = re.sub(" ", "_", outfile_name)
     outfile_name = os.path.join(OUTPATH, outfile_name) 
 
-    with codecs.open(outfile_name, "w", "utf-8") as outfile:
-        outfile.write(unicode(doc["raw_text"])
+    with codecs.open(outfile_name, "w+", "utf-8") as outfile:
+        outfile.write(unicode(doc["raw_text"]))

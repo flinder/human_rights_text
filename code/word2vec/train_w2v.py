@@ -9,7 +9,7 @@ import sys
 
 client = MongoClient()
 
-db = client['human_rights_text']
+db = client['hr']
 reports = db['reports']
 
 point = reports.find()
