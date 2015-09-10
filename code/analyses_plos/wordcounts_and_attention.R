@@ -1,12 +1,6 @@
 library(ggplot2)
 library(countrycode)
 library(dplyr)
-library(tidyr)
-library(randomForest)
-library(doParallel)
-library(edarf)
-library(reshape2)
-library(xtable)
 
 ##===============================================================================
 ## Plot settings
@@ -21,7 +15,8 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 FILL <- scale_fill_manual(values = cbPalette)
 COLOR <- scale_color_manual(values = cbPalette)
 THEME <- theme(panel.background = element_rect(fill = "white", colour = "black"), 
-               panel.grid.major = element_line(colour = "gray70"))
+               panel.grid.major = element_line(colour = "gray70")
+               )
 
 #===============================================================================
 # Descriptives from wordcounts
@@ -30,8 +25,6 @@ THEME <- theme(panel.background = element_rect(fill = "white", colour = "black")
 ## Load wordcounts file (Extracted from mongoDB with extract_data.sh, replaced "'" with "" in file)
 wc <- read.table("../../data/analyses_plos/all_reports.csv", sep = ",", header = TRUE)
 wc <- tbl_df(wc)
-
-
 
 wc <- rename(wc, year = year.0, fariss = fariss.mean) %>%
       group_by(organization, year)
@@ -47,7 +40,7 @@ p <- ggplot(pdat, aes(year, count, fill = organization)) + THEME + FILL +
        geom_text(aes(label = count, y = pos), size = 3, color = "white") + 
        theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
        labs(x = "Year", y = "Number of reports")
-#ggsave("figures/coverage.png", p, width = 1.5 * w, height = h)
+ggsave("figures/coverage.tiff", p, width = 1.5 * w, height = h)
 
 ## Absolute wordcount by organization
 dldat <- summarize(wc, nwords = sum(wordcount))
@@ -56,7 +49,7 @@ p <- ggplot(dldat, aes(x = year, y = nwords, color = organization,
         geom_line() +
         geom_point() +
         ylab("Number of words")
-#ggsave("figures/org_wordcounts.png", p, width = w, height = h)
+ggsave("figures/org_wordcounts.tiff", p, width = w, height = h)
 
 ## Average document length by organization
 adldat <- summarize(wc, nwords = mean(wordcount))
@@ -65,7 +58,7 @@ p <- ggplot(adldat, aes(x = year, y = nwords, color = organization,
         geom_line() +
         geom_point() +
         ylab("Average document length (words)")
-#ggsave("figures/org_av_doclength.png", p, width = w, height = h)
+ggsave("figures/org_av_doclength.tiff", p, width = w, height = h)
 
 
 ## Get 'attention' by organization (word count, normalized by total wordcount in
@@ -81,7 +74,7 @@ cstudy <- filter(wc, country_iso3c == "IRN")
 p <- ggplot(cstudy, aes(x = year, y = attention, color = organization,
                         shape = organization)) +
        COLOR + THEME + geom_line() + geom_point()
-#ggsave("figures/attention_iraq.png", p, width = w, height = h)
+ggsave("figures/attention_iraq.tiff", p, width = w, height = h)
 
 
 #==============================================================================
@@ -105,7 +98,7 @@ p <- ggplot(pdat, aes(x = year, y = attention, color = latent_respect,
        geom_line() +
        geom_point() +
        facet_wrap(~ organization, scales = "fixed")
-#ggsave("figures/attention_fariss.png", p, width = w, height = h)
+ggsave("figures/attention_fariss.tiff", p, width = w, height = h)
 
 ### With the state measure
 wc <- group_by(wc, organization, year, state)
@@ -117,7 +110,7 @@ p <- ggplot(pdat, aes(x = year, y = attention, color = state,
        geom_line() +
        geom_point() + 
        facet_wrap(~ organization, scales = "fixed")
-#ggsave("figures/attention_state.png", p, width = w, height = h)
+ggsave("figures/attention_state.tiff", p, width = w, height = h)
 
 
 ### Make document name df for python tdm
