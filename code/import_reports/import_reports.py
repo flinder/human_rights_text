@@ -78,11 +78,20 @@ class Document(object):
                     raw_name = countrycode(codes = [self.typos[country]],
                                            origin='country_name',
                                            target='country_name')
-                    code = countrycode(codes = [self.typos[country]],
-                                       origin= 'country_name',
-                                       target= 'iso3c')
-                    out['country_name'] = raw_name
-                    out['country_code'] = code
+		    if raw_name == "yugoslavia":
+			code = "SRB"
+		    else:
+                    	code = countrycode(codes = [self.typos[country]],
+                        	           origin= 'country_name',
+                                	   target= 'iso3c')
+		    if isinstance(raw_name, list):
+			print raw_name
+                        print code
+		    	out['country_name'] = raw_name[0]
+			out['country_code'] = code[0]
+		    else:
+                    	out['country_name'] = raw_name
+                    	out['country_code'] = code
 
                 except KeyError:
                     print "Could not resolve country name for %s" %raw_name
