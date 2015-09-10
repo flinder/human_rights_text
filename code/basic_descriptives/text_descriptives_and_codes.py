@@ -1,5 +1,4 @@
-# Goes through the reports database and updates it with:
-# - document length
+# Goes through the reports database and updates it with metadata
 
 from pymongo import MongoClient
 import pandas as pd
