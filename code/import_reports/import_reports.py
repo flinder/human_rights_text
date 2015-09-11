@@ -57,16 +57,18 @@ class Document(object):
         regex: A string containing a regular expression for everything that is
                not the country name (and to be excluded) but not the file extension
         """
-        
+        # Output doc
+        out = {}
+
         fname_wo_extension = self.fname[:-4]
         country = re.sub(regex, '', fname_wo_extension)
         country = re.sub('( |-)', '_', country)
         country = country.lower()
+	# Store raw report_name
+	out['report_name'] = country
         country = re.sub('_', ' ', country)
-        # Resolve country name
-        out = {}
-
-
+       
+	# Resolve country names and store iso3 codes 
         try:
             raw_name = countrycode(codes = country, origin='country_name',
                                    target='country_name')
