@@ -2,3 +2,4 @@
 *~
 /code/word2vec/models/*
 *log.txt
+.DS_Store
