@@ -76,20 +76,16 @@ class Document(object):
             # If no name match look in the typo file
             if code == raw_name:
                 try:
-                    raw_name = countrycode(codes = [self.typos[country]],
-                                           origin='country_name',
-                                           target='country_name')
-                    code = countrycode(codes = [self.typos[country]],
-                        	       origin= 'country_name',
-                                       target= 'iso3c')
+                    raw_name = str(countrycode(codes = [self.typos[country]],
+                                               origin='country_name',
+                                               target='country_name'))
+                    code = str(ountrycode(codes = [self.typos[country]],
+                        	          origin= 'country_name',
+                                          target= 'iso3c'))
 		    if isinstance(raw_name, list):
-			print raw_name
-                        print code
-		    	out['country_name'] = raw_name[0]
-			out['country_code'] = code[0]
-		    else:
-                    	out['country_name'] = raw_name
-                    	out['country_code'] = code
+			raise TypeError("code of type list")
+                    out['country_name'] = raw_name
+                    out['country_code'] = code
 
                 except KeyError:
                     print "Could not resolve country name for %s" %raw_name
@@ -103,9 +99,8 @@ class Document(object):
             print "Could not resolve country name for %s" %raw_name
             out['country_name'] = "Not resolved"
             out['country_code'] = "Not resolved"
-	if len(out['country_code']) > 3:
-	    print out['country_code']               
-        return out
+        
+	return out
 
     def extract_clean_sentences(self):
         """
@@ -240,7 +235,6 @@ if __name__ == "__main__":
             mean = np.mean(times)
             estimated = mean * (tasksize - idx) / 3600
             print "Finished %d of %d items. Estimated time remaining: %f h (%f pi)" %(idx, tasksize, estimated, mean)
-            times = []
 
     file_dir = sys.argv[1]
     log_fname = sys.argv[2]
