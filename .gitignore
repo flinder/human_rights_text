@@ -1,3 +1,4 @@
 /data/
 *~
 /code/word2vec/models/*
+*log.txt
