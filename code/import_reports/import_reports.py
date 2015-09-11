@@ -9,6 +9,7 @@ import os
 import json
 import pandas as pd
 from datetime import datetime
+sys.path.insert(1, '~/pycountrycode')
 from countrycode import countrycode
 from pymongo import MongoClient
 from nltk.metrics import *
@@ -78,12 +79,9 @@ class Document(object):
                     raw_name = countrycode(codes = [self.typos[country]],
                                            origin='country_name',
                                            target='country_name')
-		    if raw_name == "yugoslavia":
-			code = "SRB"
-		    else:
-                    	code = countrycode(codes = [self.typos[country]],
-                        	           origin= 'country_name',
-                                	   target= 'iso3c')
+                    code = countrycode(codes = [self.typos[country]],
+                        	       origin= 'country_name',
+                                       target= 'iso3c')
 		    if isinstance(raw_name, list):
 			print raw_name
                         print code
@@ -105,7 +103,8 @@ class Document(object):
             print "Could not resolve country name for %s" %raw_name
             out['country_name'] = "Not resolved"
             out['country_code'] = "Not resolved"
-               
+	if len(out['country_code']) > 3:
+	    print out['country_code']               
         return out
 
     def extract_clean_sentences(self):
