@@ -141,6 +141,7 @@ class Document(object):
         doc['organization'] = self.organization
         doc['country_name'] = self.country_name
         doc['country_iso3c'] = self.country_iso3c
+	doc['report_name'] = self.report_name
         doc['year'] = self.year
         doc['preprocessed_text'] = self.sentences
         doc['raw_text'] = self.raw_text
@@ -154,6 +155,7 @@ class AI_doc(Document):
         cntry = self.get_country('AI_Report_[0-9]{4}((-|_)[0-9]{2})?_')
         self.country_name = cntry['country_name']
         self.country_iso3c = cntry['country_code']
+	self.report_name = cntry['report_name']
         self.sentences = self.extract_clean_sentences()
 
     def get_year(self):
@@ -182,7 +184,7 @@ class SD_doc(Document):
         self.country_name = cntry['country_name']
         self.country_iso3c = cntry['country_code']
         self.sentences = self.extract_clean_sentences()
-
+	self.report_name = cntry['report_name']
 
 class CR_doc(Document):
 
@@ -193,6 +195,8 @@ class CR_doc(Document):
         self.country_name = cntry['country_name']
         self.country_iso3c = cntry['country_code']
         self.sentences = self.extract_clean_sentences()
+	self.report_name = cntry['report_name']
+
 
 class HRW_doc(Document):
 
@@ -203,6 +207,8 @@ class HRW_doc(Document):
         self.country_name = cntry['country_name']
         self.country_iso3c = cntry['country_code']
         self.sentences = self.extract_clean_sentences()
+	self.report_name = cntry['report_name']
+
 
 
 # ==============================================================================
