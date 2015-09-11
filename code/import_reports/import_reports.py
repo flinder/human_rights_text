@@ -79,7 +79,7 @@ class Document(object):
                     raw_name = str(countrycode(codes = [self.typos[country]],
                                                origin='country_name',
                                                target='country_name'))
-                    code = str(ountrycode(codes = [self.typos[country]],
+                    code = str(countrycode(codes = [self.typos[country]],
                         	          origin= 'country_name',
                                           target= 'iso3c'))
 		    if isinstance(raw_name, list):
