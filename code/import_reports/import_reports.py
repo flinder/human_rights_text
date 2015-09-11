@@ -78,14 +78,12 @@ class Document(object):
             # If no name match look in the typo file
             if code == raw_name:
                 try:
-                    raw_name = str(countrycode(codes = [self.typos[country]],
+                    raw_name = countrycode(codes = [self.typos[country]],
                                                origin='country_name',
-                                               target='country_name'))
-                    code = str(countrycode(codes = [self.typos[country]],
+                                               target='country_name')
+                    code = countrycode(codes = [self.typos[country]],
                         	          origin= 'country_name',
-                                          target= 'iso3c'))
-		    if isinstance(raw_name, list):
-			raise TypeError("code of type list")
+                                          target= 'iso3c')
                     out['country_name'] = raw_name
                     out['country_code'] = code
 
@@ -102,6 +100,11 @@ class Document(object):
             out['country_name'] = "Not resolved"
             out['country_code'] = "Not resolved"
         
+	# Somehow countrycode returns list in some cases. Check and make string
+	if isinstance(out['country_name'], list):
+		out['country_name'] = out['country_name'][0]
+	if isinstance(out['country_code'], list):
+		out['country_code'] = out['country_code'][0]
 	return out
 
     def extract_clean_sentences(self):
