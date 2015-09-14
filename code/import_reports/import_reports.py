@@ -302,7 +302,7 @@ if __name__ == "__main__":
 	    # Insert metadata
 	    if len(out['country_iso3c']) > 3:
 		# No country report or country could not be resolved. Just add the wordcounts
-                out['word_count'] = wordcount(out['preprocessed_text'])
+		pass
 	    else:
 		iso = out['country_iso3c']
 	        orga = out['organization']
@@ -338,7 +338,19 @@ if __name__ == "__main__":
 			out['word_count'] = wordcount(out['preprocessed_text'])
 			out = recursive_na_delete(out)
 		else:
-			out['word_count'] = wordcount(out['preprocessed_text'])
+			pass
+	    
+            out['word_count'] = wordcount(out['preprocessed_text'])
+            
+	    # Insert the new filename
+            if len(doc['country_iso3c']) == 3:
+		x = "{}_{}_{}.txt".format(doc['country_iso3c'], doc['year'][0], doc['organization'])
+		x = re.sub(" ", "_", x)
+		out['new_filename'] = x
+	    else:
+		x = "{}_{}_{}.txt".format(doc['report_name'], doc['year'][0], doc['organization'])
+		x = re.sub(" ", "_", x)
+		out['new_filename'] = x
 	    connection.update({'fname': doc.fname}, out, upsert = True)
 
             i += 1
