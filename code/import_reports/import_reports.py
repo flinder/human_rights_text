@@ -16,6 +16,7 @@ from nltk.metrics import *
 import codecs
 import time
 import numpy as np
+from pprint import pprint
 
 class Document(object):
 
@@ -247,6 +248,24 @@ if __name__ == "__main__":
             estimated = mean * (tasksize - idx) / 3600
             print "Finished %d of %d items. Estimated time remaining: %f h (%f pi)" %(idx, tasksize, estimated, mean)
 
+    def wordcount(sentences):
+	count = 0
+        for el in sentences:
+   	    count += len(el)
+	return count
+
+
+    def recursive_na_delete(doc):
+        for key in doc.keys():
+       	    if isinstance(doc[key], float):
+	        if np.isnan(doc[key]):
+		    del doc[key]
+	    elif isinstance(doc[key], dict):
+	        recursive_na_delete(doc[key])
+	    else:
+	        continue
+	return doc
+
     file_dir = sys.argv[1]
     log_fname = sys.argv[2]
     database = sys.argv[3]
@@ -263,7 +282,8 @@ if __name__ == "__main__":
             splits = line.split("|")
             typos[splits[0]] = splits[1]
 
-    
+    # Load meta data file
+    metadata = pd.read_csv('../../data/coding_files/hr_codings.csv')
     # Connect to mongo db
     connection = MongoClient()[database][collection]
 
@@ -276,18 +296,50 @@ if __name__ == "__main__":
         for fname in files:
             
             path = os.path.join(root, fname)
-
             doc = get_doctype(path)
-
             out = doc.export_dict()
-            try:
-                out['country_iso3c']
-            except KeyError:
-                message = "[%s] Could not resolve country name for: %s \n" %(str(datetime.now()), out['file_name'])
-                with open(log_fname, 'a') as logfile:
-                    logfile.write(message)
 
-            connection.update({'fname': doc.fname}, out, upsert = True)
+	    # Insert metadata
+	    if len(out['country_iso3c']) > 3:
+		# No country report or country could not be resolved. Just add the wordcounts
+                out['word_count'] = wordcount(out['preprocessed_text'])
+	    else:
+		iso = out['country_iso3c']
+	        orga = out['organization']
+	        year = out['year'][0]
+		# Find row in metadata file
+	  	row = metadata[(metadata.Year == year) & (metadata.country_iso3c == iso)]
+		if row.shape[0] == 1:
+			
+			out['country_cow_code'] = row.iloc[0]['country_cow']
+			out['CIRI_codings'] = {'physical_integrity': {'killing': row.iloc[0]['KILL'],
+								      'dissapearance': row.iloc[0]['DISAP'],
+								      'imprisonment': row.iloc[0]['POLPRIS'],
+								      'torture': row.iloc[0]['TORT']
+								      },
+						'empowerment': {'assembly': row.iloc[0]['ASSN'],
+								'domestic_movement': row.iloc[0]['DOMMOV'],
+								'foreign_movement': row.iloc[0]['FORMOV'],
+								'speech': row.iloc[0]['SPEECH'],
+								'worker_rights': row.iloc[0]['WORKER'],
+								'electoral_rights': row.iloc[0]['ELECSD'],
+								'religious_rights': row.iloc[0]['NEW_RELFRE']
+								}
+					       }
+			out['hathaway'] = row.iloc[0]['hathaway']
+			out['state'] = row.iloc[0]['State']
+			out['genocide'] = row.iloc[0]['genocide']
+			out['rummel'] = row.iloc[0]['rummel']
+			out['massive_repression'] = row.iloc[0]['massive_repression']
+			out['amnesty'] = row.iloc[0]['Amnesty']
+			out['fariss'] = {'mean': row.iloc[0]['latentmean'],
+					 'std_deviation': row.iloc[0]['latentsd']
+					}
+			out['word_count'] = wordcount(out['preprocessed_text'])
+			out = recursive_na_delete(out)
+		else:
+			out['word_count'] = wordcount(out['preprocessed_text'])
+	    connection.update({'fname': doc.fname}, out, upsert = True)
 
             i += 1
             track_process(i, 100, 15000, timing = True)
