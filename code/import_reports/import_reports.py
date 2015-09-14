@@ -343,15 +343,15 @@ if __name__ == "__main__":
             out['word_count'] = wordcount(out['preprocessed_text'])
             
 	    # Insert the new filename
-            if len(doc['country_iso3c']) == 3:
-		x = "{}_{}_{}.txt".format(doc['country_iso3c'], doc['year'][0], doc['organization'])
+            if len(out['country_iso3c']) == 3:
+		x = "{}_{}_{}.txt".format(out['country_iso3c'], out['year'][0], out['organization'])
 		x = re.sub(" ", "_", x)
 		out['new_filename'] = x
 	    else:
-		x = "{}_{}_{}.txt".format(doc['report_name'], doc['year'][0], doc['organization'])
+		x = "{}_{}_{}.txt".format(out['report_name'], out['year'][0], out['organization'])
 		x = re.sub(" ", "_", x)
 		out['new_filename'] = x
-	    connection.update({'fname': doc.fname}, out, upsert = True)
+	    connection.update({'file_name': doc.fname}, out, upsert = True)
 
             i += 1
             track_process(i, 100, 15000, timing = True)

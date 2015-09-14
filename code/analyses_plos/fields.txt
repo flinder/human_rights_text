@@ -5,7 +5,7 @@ country_name
 report_name
 year.0
 organization
-wordcount
+word_count
 hathaway
 state
 fariss.mean
@@ -24,4 +24,3 @@ CIRI_codings.physical_integrity.torture
 CIRI_codings.physical_integrity.killing
 genocide
 amnesty
-political_terror_scale
