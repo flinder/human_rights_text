@@ -294,7 +294,8 @@ if __name__ == "__main__":
     for root, dirs, files in os.walk(file_dir):
 
         for fname in files:
-            
+            if fname == ".DS_Store":
+                continue
             path = os.path.join(root, fname)
             doc = get_doctype(path)
             out = doc.export_dict()
