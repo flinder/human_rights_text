@@ -1,5 +1,4 @@
-/data/analyses_plos/
-/data/original_reports/
+/data/
 *~
 /code/word2vec/models/*
 *log.txt
