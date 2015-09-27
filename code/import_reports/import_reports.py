@@ -247,6 +247,7 @@ if __name__ == "__main__":
             mean = np.mean(times)
             estimated = mean * (tasksize - idx) / 3600
             print "Finished %d of %d items. Estimated time remaining: %f h (%f pi)" %(idx, tasksize, estimated, mean)
+            times = []
 
     def wordcount(sentences):
 	count = 0
