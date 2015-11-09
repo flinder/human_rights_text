@@ -13,4 +13,4 @@ MongoDB and to augment it with metadata (content annotations) from human rights 
 
 `analyses_plos/`: Code to replicate analyses in the paper: 
 
-Fariss CJ, Linder FJ, Jones ZM, Crabtree CD, Biek MA, Ross A-SM, et al. (2015) Human Rights Texts: Converting Human Rights Primary Source Documents into Data. PLoS ONE 10(9): e0138935. doi:10.1371/journal.pone.0138935
+[Fariss CJ, Linder FJ, Jones ZM, Crabtree CD, Biek MA, Ross A-SM, et al. (2015) Human Rights Texts: Converting Human Rights Primary Source Documents into Data. PLoS ONE 10(9): e0138935. doi:10.1371/journal.pone.0138935](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0138935)
