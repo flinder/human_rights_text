@@ -45,7 +45,7 @@ Description of the variables:
 
 ### `report_files.zip`
 
-Contains all full text reports. The filenames are in the format, `[counntry iso3 code]_[coverage year]_[Organization].txt`.
+Contains all full text reports. The filenames are in the format, `[country iso3 code]_[coverage year]_[Organization].txt`.
 
 Note: Until (including) 1981 Amnesty International Reports had a coverage periods that did not align with the calendar year, therefore these reports have two coverage years. 
 ### `small_dtm.csv`
