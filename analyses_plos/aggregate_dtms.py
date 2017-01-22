@@ -22,16 +22,20 @@ VOCAB_RED_PATH = 'dtms/red_dtm_vocabulary.txt'
 METADATA = 'dtms/reports_metadata.csv'
 
 # Load the full matix
+print('Loading full dtm')
 wc_full = load_sparse_csr(FULL_PATH)
 
 # Load the vocabulary
+print('Loading full vocabulary')
 with open(VOCAB_FULL_PATH) as vocfile:
     voc_full = [x.strip('\n') for x in vocfile.readlines()]
     
 # Load the reduced matix
+print('Loading reduced dtm')
 wc_red = load_sparse_csr(RED_PATH)
 
 # Load the vocabulary
+print('Loading reduced vocabulary')
 with open(VOCAB_RED_PATH) as vocfile:
     voc_red = [x.strip('\n') for x in vocfile.readlines()]
 
@@ -80,6 +84,7 @@ def sum_mat(codefile, codename, remove_NA = True, org = None):
 codings = pd.read_csv(METADATA)
 codings.columns
 ## State
+print('Creating State Deptmt matrices')
 dtm_state = sum_mat(codings, 'state', org = 'State Department')  * wc_full
 df_state = pd.DataFrame(dtm_state.toarray(), index = ['1', '2', '3', '4', '5'])
 df_state.columns = voc_full
@@ -93,6 +98,7 @@ df_state_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_state.csv', encoding 
                 index_label = False, index = False)
 
 ## Amnesty
+print('Creating Amnesty matrices')
 dtm_amnesty = sum_mat(codings, 'amnesty', org = 'Amnesty International')  * wc_full
 df_amnesty = pd.DataFrame(dtm_amnesty.toarray(), index = ['1', '2', '3', '4', '5'])
 df_amnesty.columns = voc_full
@@ -106,6 +112,7 @@ df_amnesty_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_amnesty.csv', encod
                 index_label = False, index = False)
 
 ## hathaway
+print('Creating hathaway matrices')
 dtm_hathaway = sum_mat(codings, 'hathaway', org = 'State Department')  * wc_full
 df_hathaway = pd.DataFrame(dtm_hathaway.toarray(), index = ['1', '2', '3', '4', '5'])
 df_hathaway.columns = voc_full
@@ -119,6 +126,7 @@ df_hathaway_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_hathaway.csv', enc
                 index_label = False, index = False)
 
 ## CIRI disap
+print('Creating Ciri disap matrices')
 dtm_disap = sum_mat(codings, 'CIRI_codings.physical_integrity.dissapearance', org = ['State Department', 'Amnesty International'])  * wc_full
 df_disap = pd.DataFrame(dtm_disap.toarray(), index = ['0', '1', '2'])
 df_disap.columns = voc_full
@@ -132,6 +140,7 @@ df_disap_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_disap.csv', encoding 
                 index_label = False, index = False)
 
 ## CIRI kill
+print('Creating Ciri kill matrices')
 dtm_kill = sum_mat(codings, 'CIRI_codings.physical_integrity.killing', org = ['State Department', 'Amnesty International'])  * wc_full
 df_kill = pd.DataFrame(dtm_kill.toarray(), index = ['0', '1', '2'])
 df_kill.columns = voc_full
@@ -145,6 +154,7 @@ df_kill_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_kill.csv', encoding = 
                 index_label = False, index = False)
 
 ## CIRI polpris
+print('Creating Ciri polpris matrices')
 dtm_polpris = sum_mat(codings, 'CIRI_codings.physical_integrity.imprisonment', org = ['State Department', 'Amnesty International'])  * wc_full
 df_polpris = pd.DataFrame(dtm_polpris.toarray(), index = ['0', '1', '2'])
 df_polpris.columns = voc_full
@@ -158,6 +168,7 @@ df_polpris_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_polpris.csv', encod
                 index_label = False, index = False)
 
 ## CIRI tort
+print('Creating Ciri torture matrices')
 dtm_tort = sum_mat(codings, 'CIRI_codings.physical_integrity.torture', org = ['State Department', 'Amnesty International'])  * wc_full
 df_tort = pd.DataFrame(dtm_tort.toarray(), index = ['0', '1', '2'])
 df_tort.columns = voc_full
@@ -171,6 +182,7 @@ df_tort_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_tort.csv', encoding = 
                 index_label = False, index = False)
 
 ## CIRI assn
+print('Creating Ciri assn matrices')
 dtm_assn = sum_mat(codings, 'CIRI_codings.empowerment.assembly', org = ['State Department', 'Amnesty International'])  * wc_full
 df_assn = pd.DataFrame(dtm_assn.toarray(), index = ['0', '1', '2'])
 df_assn.columns = voc_full
@@ -184,6 +196,7 @@ df_assn_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_assn.csv', encoding = 
                 index_label = False, index = False)
 
 ## CIRI FORMOV
+print('Creating Ciri formov matrices')
 dtm_formov = sum_mat(codings, 'CIRI_codings.empowerment.foreign_movement', org = ['State Department', 'Amnesty International'])  * wc_full
 df_formov = pd.DataFrame(dtm_formov.toarray(), index = ['0', '1', '2'])
 df_formov.columns = voc_full
@@ -198,6 +211,7 @@ df_formov_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_formov.csv', encodin
 
 
 ## CIRI dommov
+print('Creating Ciri dommov matrices')
 dtm_dommov = sum_mat(codings, 'CIRI_codings.empowerment.domestic_movement', org = ['State Department', 'Amnesty International'])  * wc_full
 df_dommov = pd.DataFrame(dtm_dommov.toarray(), index = ['0', '1', '2'])
 df_dommov.columns = voc_full
@@ -211,6 +225,7 @@ df_dommov_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_dommov.csv', encodin
                 index_label = False, index = False)
 
 ## CIRI speech
+print('Creating Ciri speech matrices')
 dtm_speech = sum_mat(codings, 'CIRI_codings.empowerment.speech', org = ['State Department', 'Amnesty International'])  * wc_full
 df_speech = pd.DataFrame(dtm_speech.toarray(), index = ['0', '1', '2'])
 df_speech.columns = voc_full
@@ -224,6 +239,7 @@ df_speech_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_speech.csv', encodin
                 index_label = False, index = False)
 
 ## CIRI elecsd
+print('Creating Ciri elecsd matrices')
 dtm_elecsd = sum_mat(codings, 'CIRI_codings.empowerment.electoral_rights', org = ['State Department', 'Amnesty International'])  * wc_full
 df_elecsd = pd.DataFrame(dtm_elecsd.toarray(), index = ['0', '1', '2'])
 df_elecsd.columns = voc_full
@@ -237,6 +253,7 @@ df_elecsd_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_elecsd.csv', encodin
                 index_label = False, index = False)
 
 ## CIRI new_relfre
+print('Creating Ciri new_relfre matrices')
 dtm_new_relfre = sum_mat(codings, 'CIRI_codings.empowerment.religious_rights', org = ['State Department', 'Amnesty International'])  * wc_full
 df_new_relfre = pd.DataFrame(dtm_new_relfre.toarray(), index = ['0', '1', '2'])
 df_new_relfre.columns = voc_full
@@ -250,6 +267,7 @@ df_new_relfre_red.to_csv(path_or_buf = 'dtms/aggregated/dtm_red_new_relfre.csv',
                 index_label = False, index = False)
 
 ## CIRI worker
+print('Creating Ciri worker matrices')
 dtm_worker = sum_mat(codings, 'CIRI_codings.empowerment.worker_rights', org = ['State Department', 'Amnesty International'])  * wc_full
 df_worker = pd.DataFrame(dtm_worker.toarray(), index = ['0', '1', '2'])
 df_worker.columns = voc_full
