@@ -9,8 +9,8 @@ library(xtable)
 # CONFIG
 # ++++++++++++++++++++
 
-TABLE_DIR <- "../../HR_Text/HR_texts_03/miw_tables.tex"
-DTM_DIR <- "../../data/dtms/aggregated/dtm_red_"
+TABLE_DIR <- "miw_tables.tex"
+DTM_DIR <- "dtms/aggregated/dtm_red_"
 measures <- c("amnesty", "disap", "hathaway", "kill", "polpris", "state", "tort",
               "assn", "formov", "dommov", "speech", "elecsd", "new_relfre", "worker")
 files <- paste0(DTM_DIR, measures, ".csv")
